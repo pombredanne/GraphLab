@@ -14,9 +14,6 @@
  *  express or implied.  See the License for the specific language
  *  governing permissions and limitations under the License.
  *
- * For more about this software visit:
- *
- *      http://graphlab.org
  *
  */
 
@@ -354,7 +351,7 @@ class svdpp_vertex_program :
         if (phase == PHASE1){
           //user node receives the sum of movie weights
           if (vertex.num_out_edges() > 0){
-            vertex.data().weight = sum.pvec;
+            vertex.data().weight = sum.weight;
             float usrNorm = double(1.0/sqrt(vertex.num_out_edges()));
             vertex.data().weight *= usrNorm;
           }
@@ -587,21 +584,29 @@ struct linear_model_saver_bias_V {
 inline bool graph_loader(graph_type& graph, 
     const std::string& filename,
     const std::string& line) {
-  ASSERT_FALSE(line.empty()); 
-  // Determine the role of the data
-  edge_data::data_role_type role = edge_data::TRAIN;
-  if(boost::ends_with(filename,".validate")) role = edge_data::VALIDATE;
-  else if(boost::ends_with(filename, ".predict")) role = edge_data::PREDICT;
-  // Parse the line
+
+ // Parse the line
   std::stringstream strm(line);
   graph_type::vertex_id_type source_id(-1), target_id(-1);
   float obs(0);
   strm >> source_id >> target_id;
 
+  if (source_id == graph_type::vertex_id_type(-1) || target_id == graph_type::vertex_id_type(-1)){
+    logstream(LOG_WARNING)<<"Failed to read input line: "<< line << " in file: "  << filename << " (or node id is -1). " << std::endl;
+    return true;
+  }
+
+  // Determine the role of the data
+  edge_data::data_role_type role = edge_data::TRAIN;
+  if(boost::ends_with(filename,".validate")) role = edge_data::VALIDATE;
+  else if(boost::ends_with(filename, ".predict")) role = edge_data::PREDICT;
+ 
   if(role == edge_data::TRAIN || role == edge_data::VALIDATE){
     strm >> obs;
-    if (obs < svdpp_vertex_program::MINVAL || obs > svdpp_vertex_program::MAXVAL)
-      logstream(LOG_FATAL)<<"Rating values should be between " << svdpp_vertex_program::MINVAL << " and " << svdpp_vertex_program::MAXVAL << ". Got value: " << obs << " [ user: " << source_id << " to item: " <<target_id << " ] " << std::endl; 
+    if (obs < svdpp_vertex_program::MINVAL || obs > svdpp_vertex_program::MAXVAL){
+      logstream(LOG_WARNING)<<"Rating values should be between " << svdpp_vertex_program::MINVAL << " and " << svdpp_vertex_program::MAXVAL << ". Got value: " << obs << " [ user: " << source_id << " to item: " <<target_id << " ] " << std::endl; 
+      assert(false); 
+    }
   }
   target_id = -(graphlab::vertex_id_type(target_id + SAFE_NEG_OFFSET));
   // Create an edge and add it to the graph
@@ -725,6 +730,9 @@ int main(int argc, char** argv) {
   dc.cout() << "Finalizing graph. Finished in " 
     << timer.current_time() << std::endl;
 
+  if (!graph.num_edges() || !graph.num_vertices())
+     logstream(LOG_FATAL)<< "Failed to load graph. Check your input path: " << input_dir << std::endl;     
+
 
   dc.cout() 
     << "========== Graph statistics on proc " << dc.procid() 
@@ -765,7 +773,7 @@ int main(int argc, char** argv) {
 
 
   // Run the PageRank ---------------------------------------------------------
-  dc.cout() << "Running Bias-SGD" << std::endl;
+  dc.cout() << "Running SVD++" << std::endl;
   dc.cout() << "(C) Code by Danny Bickson, CMU " << std::endl;
   dc.cout() << "Please send bug reports to danny.bickson@gmail.com" << std::endl;
   dc.cout() << "Time   Training    Validation" <<std::endl;

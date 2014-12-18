@@ -25,18 +25,7 @@
 #include <fstream>
 
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/unordered_set.hpp>
-
 #include <graphlab.hpp>
-
-#include <graphlab/util/stl_util.hpp>
-
-
-#include <graphlab/macros_def.hpp>
 
 
 /**
@@ -169,7 +158,7 @@ public:
     distance_type newd = vertex.data().dist + edge.data().dist;
     if (other.data().dist > newd) {
       const min_distance_type msg(newd);
-      context.signal(other, newd);
+      context.signal(other, msg);
     }
   } // end of scatter
 
@@ -224,7 +213,7 @@ int main(int argc, char** argv) {
   std::string format = "adj";
   std::string exec_type = "synchronous";
   size_t powerlaw = 0;
-  std::vector<graphlab::vertex_id_type> sources;
+  std::vector<unsigned int> sources;
   bool max_degree_source = false;
   clopts.attach_option("graph", graph_dir,
                        "The graph file.  If none is provided "

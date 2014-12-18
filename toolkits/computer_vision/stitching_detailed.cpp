@@ -14,9 +14,6 @@
  *  express or implied.  See the License for the specific language
  *  governing permissions and limitations under the License.
  *
- * For more about this software visit:
- *
- *      http://www.graphlab.ml.cmu.edu
  *
  */
 
@@ -405,7 +402,7 @@ int main(int argc, char* argv[])
     matcher.collectGarbage();
     LOGLN("Pairwise matching, time: " << ((getTickCount() - t) / getTickFrequency()) << " sec");
     LOGLN("pairwise_matches.size() = " << pairwise_matches.size() << "\n");
-    for (int i=0; i!=pairwise_matches.size(); ++i) 
+    for (size_t i=0; i!=pairwise_matches.size(); ++i) 
     {
         LOGLN("src_img_idx = " << pairwise_matches[i].src_img_idx  << "\t");
         LOGLN("dst_img_idx = " << pairwise_matches[i].dst_img_idx  << "\t");

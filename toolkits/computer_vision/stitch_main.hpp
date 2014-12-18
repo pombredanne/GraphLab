@@ -14,9 +14,6 @@
  *  express or implied.  See the License for the specific language
  *  governing permissions and limitations under the License.
  *
- * For more about this software visit:
- *
- *      http://www.graphlab.ml.cmu.edu
  *
  */
 
@@ -347,7 +344,7 @@ struct ImgArea
 };
 
 ImgArea find_largest_img(engine_type::icontext_type& context,
-                         graph_type::vertex_type& vertex)
+                          graph_type::vertex_type& vertex)
 {
     // Get vertex data
     vertex_data &vdata = vertex.data();
@@ -370,14 +367,19 @@ void set_scales(engine_type::icontext_type& context, ImgArea& largestimg)
     if (opts.work_megapix > 0)
         opts.work_scale = min(1.0, sqrt(opts.work_megapix * 1e6 / largestimg.full_img_area));
     
-    opts.seam_scale = min(1.0, sqrt(opts.seam_megapix * 1e6 / largestimg.full_img_area));
+    if (opts.seam_megapix > 0)
+	opts.seam_scale = min(1.0, sqrt(opts.seam_megapix * 1e6 / largestimg.full_img_area));
     
     if (opts.compose_megapix > 0)
         opts.compose_scale = min(1.0, sqrt(opts.compose_megapix * 1e6 / largestimg.full_img_area));
+
+    if (opts.output_megapix > 0)
+        opts.output_scale = min(1.0, sqrt(opts.output_megapix * 1e6 / largestimg.full_img_area));
     
     opts.seam_work_aspect = opts.seam_scale / opts.work_scale;
     opts.compose_seam_aspect = opts.compose_scale / opts.seam_scale;
     opts.compose_work_aspect = opts.compose_scale / opts.work_scale;
+  //  opts.output_work_aspect = opts.output_scale / opts.work_scale;
 }
 
 

@@ -16,9 +16,6 @@
  *  express or implied.  See the License for the specific language
  *  governing permissions and limitations under the License.
  *
- * For more about this software visit:
- *
- *      http://www.graphlab.ml.cmu.edu
  *
  */
 
@@ -71,7 +68,10 @@ public:
 
   virtual const discrete_variable& var(size_t index) const = 0;
   
+  // REVIEW these are always dense_tables. should they be in here?
   virtual void     MAP(table_base& msg) const = 0;
+  virtual void     marginalize(table_base& msg) const = 0;
+
   virtual void    zero() = 0;
   virtual size_t numel() const = 0; // REVIEW might not be necessary
   virtual size_t ndims() const = 0;
